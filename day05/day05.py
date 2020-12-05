@@ -20,4 +20,12 @@ input_list = []
 with open("./input.txt", "r") as f:
     input_list = f.read().splitlines()
 
-print(max(map(get_seat_id, input_list)))
+# solution part 1
+# print(max(map(get_seat_id, input_list)))
+
+all_occupied_seats = set(map(get_seat_id, input_list))
+empty_seats = set(range(0, max(all_occupied_seats))) - all_occupied_seats
+for empty_seat in empty_seats:
+    if empty_seat+1 in all_occupied_seats and empty_seat-1 in all_occupied_seats:
+        print(empty_seat)
+        exit(0)
