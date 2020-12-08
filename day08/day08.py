@@ -1,21 +1,18 @@
-instruction_list = []
+il = []
 with open("./input.txt", "r") as f:
-    instruction_list = f.read().splitlines()
+    il = f.read().splitlines()
 
-idx = 0
-acc = 0
-visited_idx = set()
-
-while idx not in visited_idx:
-    print(idx)
-    visited_idx.add(idx)
-    if instruction_list[idx].startswith("nop"):
-        idx += 1
-    elif instruction_list[idx].startswith("acc"):
-        acc += int(instruction_list[idx].split(" ")[1])
-        idx += 1
+def find_solution(idx, acc, visited):
+    if idx in visited:
+        return None
+    if idx == len(il):
+        return visited, acc
     else:
-        idx += int(instruction_list[idx].split(" ")[1])
-    
+        if il[idx].startswith("nop"):
+            return find_solution(idx+1, acc, visited.union(set([idx]))) or find_solution(idx+int(il[idx].split(" ")[1]), acc, visited.union(set([idx])))
+        elif il[idx].startswith("acc"):
+            return find_solution(idx+1, acc+int(il[idx].split(" ")[1]), visited.union(set([idx])))
+        else:
+            return find_solution(idx+int(il[idx].split(" ")[1]), acc, visited.union(set([idx]))) or find_solution(idx+1, acc, visited.union(set([idx])))
 
-print(acc)
+print(find_solution(0, 0, set())[1])
