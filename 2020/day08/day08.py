@@ -1,5 +1,5 @@
 il = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     il = f.read().splitlines()
 
 parse = lambda idx: int(il[idx].split(" ")[1])

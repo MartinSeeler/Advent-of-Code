@@ -8,7 +8,7 @@ def split_inst(value):
 	return (INST_CODES.index(match.groups()[0]), int(match.groups()[1]))
 
 all_inst = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     all_inst = list([split_inst(x) for x in f.read().splitlines()])
 
 def walk(instructions, w_x = -1, w_y = 10, x = 0, y = 0):

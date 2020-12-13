@@ -1,7 +1,7 @@
 from functools import reduce
 from math import prod
 
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
   lines = f.read().splitlines()
   ts_0 = int(lines[0])
   bus_ids = [int(x) for x in lines[1].split(",") if x != "x"]

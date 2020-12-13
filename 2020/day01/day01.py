@@ -1,7 +1,7 @@
 from itertools import combinations
 
 input_list = []
-with open("./day01-input.txt", "r") as f:
+with open("day01-input.txt", "r") as f:
     lines = f.read().splitlines()
     input_list = [int(x) for x in lines]
 

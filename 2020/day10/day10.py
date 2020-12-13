@@ -1,5 +1,5 @@
 adapters = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     adapters = sorted(list([int(x) for x in f.read().splitlines()]))
 
 highest = max(adapters)+3

@@ -2,7 +2,7 @@ import re
 from functools import reduce
 
 input_list = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     lines = f.read().splitlines()
     for line in lines:
         input_list.append(line.split(" "))

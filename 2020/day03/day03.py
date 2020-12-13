@@ -2,7 +2,7 @@ from operator import mul
 from functools import reduce
 
 input_list = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     input_list = f.read().splitlines()
 
 

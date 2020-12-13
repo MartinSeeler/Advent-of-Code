@@ -17,7 +17,7 @@ def get_seat_id(pattern: str):
 
 
 input_list = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     input_list = f.read().splitlines()
 
 # solution part 1

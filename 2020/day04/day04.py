@@ -1,7 +1,7 @@
 import re
 
 input_list = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     input_list = f.read().splitlines()
 
 field_necessary = set(["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"])

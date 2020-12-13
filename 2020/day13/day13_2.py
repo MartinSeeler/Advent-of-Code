@@ -13,5 +13,5 @@ def solve(inp):
   return N - x % N
 
 
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
   print(solve(f.read().splitlines()[1]))

@@ -1,7 +1,7 @@
 from itertools import combinations as cs
 
 pa_length = 25
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     nums = list([int(x) for x in f.read().splitlines()])
     for part in [nums[i:i+pa_length+1] for i in range(0,len(nums), 1)]:
         xmas = part[:pa_length]

@@ -1,7 +1,7 @@
 import re
 
 rules_list = []
-with open("./input.txt", "r") as f:
+with open("input.txt", "r") as f:
     rules_list = f.read().splitlines()
 
 paths = dict()
