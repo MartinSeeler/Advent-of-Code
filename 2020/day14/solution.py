@@ -25,14 +25,36 @@ def solve_part_1(text: str):
         real_value = int(value)
         for p, b in mask:
           real_value = set_bit(p, real_value) if b else clear_bit(p, real_value)
-        # print("value", idx, value, real_value)
         memory[int(idx)] = real_value
-  # print(memory)
   return sum(memory.values())
 
 
 def solve_part_2(text: str):
-  return 0
+  memory = defaultdict(lambda: 0)
+  lines = [x.strip() for x in text.splitlines()]
+  mask = []
+  for line in lines:
+    if line.startswith("mask"):
+      mask = [(idx, x) for idx, x in enumerate(reversed(line.split(" = ")[1]))]
+    else:
+      match = re.match(r"^mem\[(\d+)\] = (\d+)", line, re.I)
+      if match:
+        address, value = match.groups()
+        real_address = int(address)
+        for p, b in mask:
+          if b == "1":
+            real_address = set_bit(int(p), real_address)
+        addresses = [real_address]
+        for p, b in mask:
+          if b == "X":
+            next_addresses = []
+            for a in addresses:
+              next_addresses.append(set_bit(int(p), a))
+              next_addresses.append(clear_bit(int(p), a))
+            addresses = next_addresses
+        for a in set(addresses):
+          memory[a] = int(value)
+  return sum(memory.values())
 
 
 if __name__ == '__main__':
