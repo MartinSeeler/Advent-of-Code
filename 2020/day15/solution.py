@@ -1,20 +1,12 @@
 def solve(text: str, limit: int):
   nums = [int(x) for x in text.strip().split(",")]
-  turn = len(nums) + 1
-  memory = {x: [n + 1] for n, x in enumerate(nums)}
-  last = nums[-1]
-  insert = lambda l, m, t: [t] if l not in m else [m[l][-1]] + [t]
-  while turn <= limit:
-    if last in memory and len(memory[last]) == 1:
-      last = 0
-      memory[last] = insert(last, memory, turn)
-    elif last in memory and len(memory[last]) > 1:
-      last = memory[last][-1] - memory[last][-2]
-      memory[last] = insert(last, memory, turn)
-    else:
-      memory[last] = [turn]
-    turn += 1
-  return last
+  memory = {x: n + 1 for n, x in enumerate(nums)}
+  turn = nums[-1]
+  for turn in range(len(nums) + 1, limit + 1):
+    num = turn - 1 - memory[turn] if turn in memory else 0
+    memory[turn] = turn - 1
+    turn = num
+  return turn
 
 
 def solve_part_1(text: str):
@@ -22,7 +14,7 @@ def solve_part_1(text: str):
 
 
 def solve_part_2(text: str):
-  solve(text, 30000000)
+  return solve(text, 30000000)
 
 
 if __name__ == '__main__':
