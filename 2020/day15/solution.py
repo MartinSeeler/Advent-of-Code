@@ -1,5 +1,4 @@
-def solve(text: str, limit: int):
-  nums = [int(x) for x in text.strip().split(",")]
+def solve(nums: list[int], limit: int):
   memory = {x: n + 1 for n, x in enumerate(nums)}
   last = nums[-1]
   for turn in range(len(nums) + 1, limit + 1):
@@ -10,11 +9,11 @@ def solve(text: str, limit: int):
 
 
 def solve_part_1(text: str):
-  return solve(text, 2020)
+  return solve([int(x) for x in text.strip().split(",")], 2020)
 
 
 def solve_part_2(text: str):
-  return solve(text, 30000000)
+  return solve([int(x) for x in text.strip().split(",")], 30000000)
 
 
 if __name__ == '__main__':
