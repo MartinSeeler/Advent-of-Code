@@ -1,12 +1,12 @@
 def solve(text: str, limit: int):
   nums = [int(x) for x in text.strip().split(",")]
   memory = {x: n + 1 for n, x in enumerate(nums)}
-  turn = nums[-1]
+  last = nums[-1]
   for turn in range(len(nums) + 1, limit + 1):
-    num = turn - 1 - memory[turn] if turn in memory else 0
-    memory[turn] = turn - 1
-    turn = num
-  return turn
+    num = turn - 1 - memory[last] if last in memory else 0
+    memory[last] = turn - 1
+    last = num
+  return last
 
 
 def solve_part_1(text: str):
