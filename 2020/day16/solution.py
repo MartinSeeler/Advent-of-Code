@@ -19,35 +19,30 @@ def parse_content(text: str):
   return rules, my_ticket, nearby_tickets
 
 
+in_range = lambda v, rs: rs[0] <= v <= rs[1] or rs[2] <= v <= rs[3]
+
+
 def solve_part_1(text: str):
   rules, my_ticket, nearby_tickets = parse_content(text)
-  s = 0
-  for t in nearby_tickets:
-    for v in t:
-      invalid = all(not (rs[0] <= v <= rs[1] or rs[2] <= v <= rs[3]) for rs in rules.values())
-      if invalid:
-        s += v
-  return s
+  return sum([v for t in nearby_tickets for v in t
+              if all(not in_range(v, rs) for rs in rules.values())])
 
 
 def solve_part_2(text: str):
   rules, my_ticket, nearby_tickets = parse_content(text)
   valid_ticket = list(filter(
-    lambda t: not (any([all(not (rs[0] <= v <= rs[1] or rs[2] <= v <= rs[3]) for rs in rules.values()) for v in t])),
+    lambda t: not (any([all(not in_range(v, rs) for rs in rules.values()) for v in t])),
     nearby_tickets))
   possible_mappings = {}
   for idx in range(len(my_ticket)):
-    possible = []
-    for k, rs in rules.items():
-      if all([rs[0] <= vt[idx] <= rs[1] or rs[2] <= vt[idx] <= rs[3] for vt in valid_ticket]):
-        possible.append(k)
-    possible_mappings[idx] = set(possible)
+    possible_mappings[idx] = set([k for k, rs in rules.items() if
+                                  all([in_range(vt[idx], rs) for vt in valid_ticket])])
   mapping = list([None for _ in range(len(my_ticket))])
   for _ in range(len(my_ticket)):
-    for k, pi in possible_mappings.items():
-      if len(pi) == 1:
-        field = list(pi)[0]
-        mapping[k] = field
+    for m_idx, possible_idxs in possible_mappings.items():
+      if len(possible_idxs) == 1:
+        field = list(possible_idxs)[0]
+        mapping[m_idx] = field
         for j, pis in possible_mappings.items():
           pis.discard(field)
           possible_mappings[j] = pis
