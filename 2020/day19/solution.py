@@ -1,23 +1,18 @@
-def match(sample, current, rs):
-  if len(current) > len(sample):
+def match(s, rem, rs):
+  lr, ls = len(rem), len(s)
+  if lr > ls:
     return False
-  elif len(current) == 0 or len(sample) == 0:
-    # end reached
-    return len(current) == 0 and len(sample) == 0
-
-  c = current.pop()
-  if isinstance(c, str):
-    if sample[0] == c:
-      return match(sample[1:], current.copy(), rs)
-  else:
-    for r in rs[c]:
-      if match(sample, current + list(reversed(r)), rs):
-        return True
-  return False
+  elif lr * ls == 0:
+    return (lr, ls) == (0, 0)
+  if isinstance(rem[-1], str):
+    return match(s[1:], rem[:-1], rs) if s[0] == rem[-1] else False
+  for r in rs[rem[-1]]:
+    if match(s, rem[:-1] + list(r[::-1]), rs):
+      return True
 
 
 def count_matches(rules, samples) -> int:
-  return sum([1 if match(s, list(reversed(rules[0][0])), rules) else 0 for s in samples])
+  return sum([1 if match(s, rules[0][0][::-1], rules) else 0 for s in samples])
 
 
 def parse(text: str):
@@ -25,10 +20,7 @@ def parse(text: str):
   rules = {}
   for rl in rule_lines:
     k, path = rl.split(': ')
-    if path[0] == '"':
-      rules[int(k)] = path[1]
-    else:
-      rules[int(k)] = list(map(lambda x: list(map(int, x.split(' '))), path.split(' | ')))
+    rules[int(k)] = path[1] if path[0] == '"' else list(map(lambda x: list(map(int, x.split(' '))), path.split(' | ')))
   return rules, samples
 
 
