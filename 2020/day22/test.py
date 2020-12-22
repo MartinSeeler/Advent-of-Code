@@ -37,7 +37,7 @@ Player 2:
 8
 4
 7
-10""", 0)
+10""", 291)
 ])
 def test_part_2_solution(quiz_input, expected_result):
   assert solve_part_2(quiz_input) == expected_result
