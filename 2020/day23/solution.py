@@ -3,11 +3,11 @@ from itertools import dropwhile
 
 
 def play(cups: List[int], games_to_play: int):
-  # make linked list: (value, next_idx)
   nodes: List[(int, int)] = list(zip(cups, list(range(1, len(cups))) + [0]))
   idx = lambda node: node[1]
   val = lambda node: node[0]
   walk = lambda node, n=1: nodes[idx(node)] if n <= 1 else walk(nodes[idx(node)], n - 1)
+  # this breaks part 2...
   find = lambda v: next(dropwhile(lambda x: val(x[1]) != v, enumerate(nodes)))
 
   def acc(from_idx):
@@ -20,29 +20,48 @@ def play(cups: List[int], games_to_play: int):
 
   current_idx = 0
   for r in range(games_to_play):
-    if r % 1000 == 0:
-      print(f"-- move {r} --")
-    # print(nodes)
-    # print("cups:", f"({val(nodes[current_idx])}), {' '.join(map(str, acc(current_idx)))}")
     picked_up = list(
       map(find, [val(walk(nodes[current_idx])), val(walk(nodes[current_idx], 2)), val(walk(nodes[current_idx], 3))]))
-    # print("pick up:", " ".join(map(str, picked_up)))
     nodes[current_idx] = (val(nodes[current_idx]), idx(picked_up[-1][1]))
     dest_val = (val(nodes[current_idx]) - 1) or len(nodes)
-    # print("dest_val", dest_val, [val(x[1]) for x in picked_up])
     while dest_val in [val(x[1]) for x in picked_up]:
       dest_val = (dest_val - 1) or len(nodes)
-    # print("dest_val", dest_val)
     dest_idx, dest_node = find(dest_val)
-    # print(f"destination: {dest_node} at {dest_idx}")
-    # print("search", picked_up[-1])
     nodes[picked_up[-1][0]] = (val(picked_up[-1][1]), idx(dest_node))
     nodes[dest_idx] = (val(dest_node), picked_up[0][0])
-    # print("nodes:", nodes)
-    # print("cups:", ' '.join(map(str, acc(current_idx))))
     current_idx = idx(nodes[current_idx])
   dest_idx, dest_node = find(1)
   return acc(dest_idx)
+
+
+class Node:
+  def __init__(self, value, right=None):
+    self.value = value
+    self.right = right
+
+
+def play_linked_list(cups: List[int], games_to_play: int):
+  nm = {}
+  prev = None
+  for c in cups:
+    node = Node(c)
+    nm[c] = node
+    if prev:
+      prev.right = node
+    prev = node
+  prev.right = nm[cups[0]]
+  n = None
+  for i in range(games_to_play):
+    n = n.right if n else nm[cups[0]]
+    picked_up = [n.right, n.right.right, n.right.right.right]
+    n.right = picked_up[-1].right
+    d_value = n.value - 1 or len(cups)
+    while nm[d_value] in picked_up:
+      d_value = d_value - 1 or len(cups)
+    destination = nm[d_value]
+    picked_up[-1].right = destination.right
+    destination.right = picked_up[0]
+  return nm
 
 
 def parse(text: str) -> List[int]:
@@ -54,9 +73,10 @@ def solve_part_1(text: str, rounds: int):
 
 
 def solve_part_2(text: str, rounds: int):
-  xs = parse(text)
-  res = play(xs + list(range(len(xs) + 1, 1000001)), rounds)
-  return res[1] * res[2]
+  cups = parse(text)
+  cups = cups + [i for i in range(len(cups) + 1, 1000001)]
+  node_map = play_linked_list(cups, rounds)
+  return node_map[1].right.value * node_map[1].right.right.value
 
 
 if __name__ == '__main__':
