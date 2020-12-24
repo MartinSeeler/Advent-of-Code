@@ -56,14 +56,14 @@ def get_initial_map(text: str) -> Counter:
 
 def solve_part_1(text: str):
   c = get_initial_map(text)
-  return sum([1 for tile in c.keys() if is_black(tile, c)])
+  return sum([is_black(tile, c) for tile in c.keys()])
 
 
 def solve_part_2(text: str, days: int):
   c = get_initial_map(text)
   for _ in range(days):
     c = conway(c)
-  return sum([1 for k, v in c.items() if v % 2 == 1])
+  return sum([is_black(tile, c) for tile in c.keys()])
 
 
 if __name__ == '__main__':
