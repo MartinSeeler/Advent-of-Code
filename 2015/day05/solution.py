@@ -2,11 +2,17 @@ import re
 
 two_same_chars = re.compile(r"(\w)\1+")
 vovel = re.compile(r"([aeiou])")
+enclosed = re.compile(r"(\w).\1")
+foo = re.compile(r"(\w{2}).*\1")
 
 
 def is_nice(text: str) -> bool:
   return all([x not in text for x in ["ab", "cd", "pq", "xy"]]) and (len(re.findall(two_same_chars, text)) > 0) and (
-        len(re.findall(vovel, text)) >= 3)
+      len(re.findall(vovel, text)) >= 3)
+
+
+def is_nice2(text: str) -> bool:
+  return len(re.findall(enclosed, text)) > 0 and len(re.findall(foo, text)) > 0
 
 
 def solve_part_1(text: str) -> int:
@@ -14,7 +20,7 @@ def solve_part_1(text: str) -> int:
 
 
 def solve_part_2(text: str):
-  pass
+  return sum(map(is_nice2, text.splitlines()))
 
 
 if __name__ == '__main__':
