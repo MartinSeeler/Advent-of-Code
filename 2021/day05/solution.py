@@ -15,7 +15,7 @@ def get_line_points(x1, y1, x2, y2):
 def solve_part_1(text: str):
     c = Counter()
     for line in text.splitlines():
-        [x1, y1, x2, y2] = x = list(map(int, re.findall("[0-9]+", line)))
+        [x1, y1, x2, y2] = list(map(int, re.findall("[0-9]+", line)))
         if x1 == x2 or y1 == y2:
             for (x, y) in get_line_points(x1, y1, x2, y2):
                 c[(x, y)] += 1
@@ -25,7 +25,7 @@ def solve_part_1(text: str):
 def solve_part_2(text: str):
     c = Counter()
     for line in text.splitlines():
-        [x1, y1, x2, y2] = x = list(map(int, re.findall("[0-9]+", line)))
+        [x1, y1, x2, y2] = list(map(int, re.findall("[0-9]+", line)))
         for (x, y) in get_line_points(x1, y1, x2, y2):
             c[(x, y)] += 1
     return len(list(filter(lambda x: x >= 2, list(c.values()))))
