@@ -25,8 +25,7 @@ def solve_part_1(text: str):
 
 
 def solve_part_2(text: str):
-  possible_mapping, counter = parse(text)
-  print(possible_mapping)
+  possible_mapping, _ = parse(text)
   final = {}
   while len(possible_mapping) > 0:
     for k in list(possible_mapping.keys()):
