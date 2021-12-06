@@ -1,11 +1,9 @@
 def solve(text: str, days: int):
-    initial_ages = list(map(int, text.split(",")))
-    age_counts = [initial_ages.count(i) for i in range(9)]
+    ages = [*map(text.count, "012345678")]
     for _ in range(days):
-        newborns = age_counts.pop(0)
-        age_counts[6] += newborns
-        age_counts.append(newborns)
-    return sum(age_counts)
+        ages = ages[1:] + ages[:1]
+        ages[6] += ages[-1]
+    return sum(ages)
 
 
 if __name__ == "__main__":
