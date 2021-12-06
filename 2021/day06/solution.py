@@ -1,23 +1,11 @@
-import re
-from collections import Counter
-
-
-def iter_generation(ages: Counter) -> Counter:
-    new_ages = Counter()
-    for age in range(8, -1, -1):
-        if age == 0:
-            new_ages[6] += ages[0]
-            new_ages[8] += ages[0]
-        else:
-            new_ages[(age - 1)] = ages[age]
-    return new_ages
-
-
 def solve(text: str, days: int):
-    ages = Counter([int(x) for x in re.findall("[0-9]+", text)])
-    for _ in range(1, days + 1):
-        ages = iter_generation(ages)
-    return sum(ages.values())
+    initial_ages = list(map(int, text.split(",")))
+    age_counts = [initial_ages.count(i) for i in range(9)]
+    for _ in range(days):
+        newborns = age_counts.pop(0)
+        age_counts[6] += newborns
+        age_counts.append(newborns)
+    return sum(age_counts)
 
 
 if __name__ == "__main__":
