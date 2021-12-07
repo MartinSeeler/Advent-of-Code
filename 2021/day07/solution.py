@@ -9,6 +9,8 @@ def solve_part_1(text: str):
 def solve_part_2(text: str):
     cost = lambda d: d * (d + 1) // 2
     nums = [int(x) for x in text.split(",")]
+    # this would minimize cost^2 instead of cost * (cost + 1) / 2, but if we
+    # round the mean, we get close enough acording to the tests
     return sum(cost(abs(nums - np.round(np.mean(nums)))))
 
 
