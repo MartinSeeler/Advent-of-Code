@@ -1,16 +1,15 @@
+import numpy as np
+
+
 def solve_part_1(text: str):
     nums = [int(x) for x in text.split(",")]
-    return min([sum([abs(n - idx) for n in nums]) for idx in range(max(nums))])
+    return sum(abs(nums - np.median(nums)))
 
 
 def solve_part_2(text: str):
+    cost = lambda d: d * (d + 1) // 2
     nums = [int(x) for x in text.split(",")]
-    return min(
-        [
-            sum([(abs(n - idx)) * (abs(n - idx) + 1) // 2 for n in nums])
-            for idx in range(max(nums))
-        ]
-    )
+    return sum(cost(abs(nums - np.round(np.mean(nums)))))
 
 
 if __name__ == "__main__":
