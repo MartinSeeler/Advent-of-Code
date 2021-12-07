@@ -1,3 +1,6 @@
+import time
+
+
 def solve(text: str, days: int):
     ages = [*map(text.count, "012345678")]
     for _ in range(days):
@@ -9,5 +12,10 @@ def solve(text: str, days: int):
 if __name__ == "__main__":
     with open("input.txt", "r") as f:
         quiz_input = f.read()
-        print("Part 1:", solve(quiz_input, 80))
-        print("Part 2:", solve(quiz_input, 256))
+        start = time.time()
+        p_1_solution = solve(quiz_input, 80)
+        middle = time.time()
+        print(f"Part 1: {p_1_solution} (took {(middle - start) * 1000:.3f}ms)")
+        p_2_solution = solve(quiz_input, 256)
+        end = time.time()
+        print(f"Part 2: {p_2_solution} (took {(end - middle) * 1000:.3f}ms)")

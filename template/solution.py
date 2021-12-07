@@ -1,3 +1,6 @@
+import time
+
+
 def solve_part_1(text: str):
   pass
 
@@ -9,5 +12,10 @@ def solve_part_2(text: str):
 if __name__ == '__main__':
   with open("input.txt", "r") as f:
     quiz_input = f.read()
-    print("Part 1:", solve_part_1(quiz_input))
-    print("Part 2:", solve_part_2(quiz_input))
+    start = time.time()
+    p_1_solution = int(solve_part_1(quiz_input))
+    middle = time.time()
+    print(f"Part 1: {p_1_solution} (took {(middle - start) * 1000:.3f}ms)")
+    p_2_solution = int(solve_part_2(quiz_input))
+    end = time.time()
+    print(f"Part 2: {p_2_solution} (took {(end - middle) * 1000:.3f}ms)")
