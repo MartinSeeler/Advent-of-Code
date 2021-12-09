@@ -3,29 +3,22 @@ from functools import reduce
 import time
 
 
-def has_pos(field: list[list[int]], pos: complex):
-    """checks if the complex number is in between the bounds of the 2d field array"""
-    if pos.real < 0 or pos.real >= len(field):
-        return False
-    if pos.imag < 0 or pos.imag >= len(field[0]):
-        return False
-    return True
+def has_pos(field: list[list[int]], pos: complex) -> bool:
+    return 0 <= pos.real < len(field) and 0 <= pos.imag < len(field[0])
 
 
 dirs = [0 + 1j, 1 + 0j, 0 - 1j, -1 + 0j]
 
 
-def is_low_point(field: list[list[int]], pos: complex):
-    """checks if all values in field around the current pos are either non existing or lower than the current value at pos"""
+def adjacents(pos: complex, field: list[list[int]]) -> list[complex]:
+    return [pos + d for d in dirs if has_pos(field, pos + d)]
+
+
+def is_low_point(field: list[list[int]], pos: complex) -> bool:
     cur_value = field[int(pos.real)][int(pos.imag)]
-    for d in dirs:
-        moved = pos + d
-        if not has_pos(field, moved):
-            continue
-        f_value = field[int(moved.real)][int(moved.imag)]
-        if f_value <= cur_value:
-            return False
-    return True
+    return all(
+        field[int(adj.real)][int(adj.imag)] > cur_value for adj in adjacents(pos, field)
+    )
 
 
 def solve_part_1(text: str):
@@ -39,40 +32,35 @@ def solve_part_1(text: str):
     return res
 
 
-def rec_find_basin(field: list[list[int]], rem: set[complex], basin: set[complex]):
-    """recursively finds the lowest value in the basin of the current pos"""
-    if len(rem) == 0:
-        return basin
-    pos = rem[0]
-    if not has_pos(field, pos):
-        return rec_find_basin(field, rem[1:], basin)
-    cur_value = field[int(pos.real)][int(pos.imag)]
-    new_basin_pos = []
-    for d in dirs:
-        moved = pos + d
-        if not has_pos(field, moved):
-            continue
+def bfs_basins(grid: list[list[int]], start: complex):
+    remaining = deque()
+    basin = set()
+    basin.add(start)
+    remaining.append(start)
 
-        f_value = field[int(moved.real)][int(moved.imag)]
-        if f_value > cur_value and f_value < 9 and moved not in basin:
-            new_basin_pos.append(moved)
-    return rec_find_basin(field, rem[1:] + new_basin_pos, basin + new_basin_pos)
+    while remaining:
+        cur_pos = remaining.popleft()
+        cur_val = grid[int(cur_pos.real)][int(cur_pos.imag)]
+        for pos in adjacents(cur_pos, grid):
+            if pos not in basin:
+                adj_val = grid[int(pos.real)][int(pos.imag)]
+                # height 9 cannot ever be included.
+                if adj_val < 9 and adj_val > cur_val:
+                    basin.add(pos)
+                    remaining.append(pos)
+    return basin
 
 
 def solve_part_2(text: str):
-    basins = []
+    basin_lens = []
     field = [list(map(int, line.strip())) for line in text.splitlines()]
     for ix, row in enumerate(field):
-        for jx, num in enumerate(row):
+        for jx, _ in enumerate(row):
             pos = complex(ix, jx)
             if is_low_point(field, pos):
-                basin = set(rec_find_basin(field, [pos], [pos]))
-                print(basin, pos, len(basin))
-                basins.append(len(basin))
-    # return the 3 largest values in basins
-    largest = sorted(basins, reverse=True)[:3]
-    # return the multply of largest
-    return reduce(lambda x, y: x * y, largest)
+                basin = bfs_basins(field, pos)
+                basin_lens.append(len(basin))
+    return reduce(lambda x, y: x * y, sorted(basin_lens, reverse=True)[:3])
 
 
 if __name__ == "__main__":
