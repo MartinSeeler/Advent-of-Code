@@ -1,71 +1,50 @@
 import time
-from typing import Tuple
+import numpy as np
 
 
-def parse_map(text: str) -> list[list[int]]:
-    return [list(map(int, line.strip())) for line in text.splitlines()]
+def get_inc_mask(s, x, y):
+    mask = np.zeros(s, dtype=np.int8)
+    mask[
+        np.max([x - 1, 0]) : np.min([x + 2, mask.shape[0]]),
+        np.max([y - 1, 0]) : np.min([y + 2, mask.shape[1]]),
+    ] = 1
+    mask[x, y] = 0
+    return mask
 
 
-def increase_all(map: list[list[int]]) -> list[list[int]]:
-    for x in range(0, len(map)):
-        for y in range(0, len(map[x])):
-            map[x][y] += 1
-    return map
-
-
-def find_9s(map: list[list[int]]):
-    return [
-        (x, y)
-        for x in range(0, len(map))
-        for y in range(0, len(map[x]))
-        if map[x][y] > 9
-    ]
-
-
-def increase_around(map: list[list[int]], x: int, y: int) -> list[list[int]]:
-    for i in range(x - 1, x + 2):
-        for j in range(y - 1, y + 2):
-            if (
-                i >= 0
-                and i < len(map)
-                and j >= 0
-                and j < len(map[i])
-                and (i, j) != (x, y)
-            ):
-                map[i][j] += 1
-    return map
-
-
-def play_part_1(map: list[list[int]]) -> Tuple[list[list[int]], int]:
-    map = increase_all(map)
-    flashing = set()
-    while len(not_increased_yet := set(find_9s(map)) - set(flashing)) > 0:
-        for x, y in not_increased_yet:
-            map = increase_around(map, x, y)
-        flashing = flashing.union(not_increased_yet)
-    for x, y in flashing:
-        map[x][y] = 0
-    return map, len(flashing)
+def play_field(field):
+    field += 1
+    all_flashes = np.zeros(field.shape, dtype=bool)
+    while np.any(flashes := (field > 9) & ~all_flashes):
+        inc_mask = np.zeros(field.shape, dtype=np.int8)
+        for flash in np.argwhere(flashes):
+            inc_mask += get_inc_mask(field.shape, flash[0], flash[1])
+        field += inc_mask
+        all_flashes[flashes] = True
+    field[all_flashes] = 0
+    return field, np.sum(all_flashes)
 
 
 def solve_part_1(text: str):
-    map = parse_map(text)
-    total = 0
+    field = np.array(
+        [list(map(int, line)) for line in text.splitlines()], dtype=np.int8
+    )
+    total_flashes = 0
     for _ in range(0, 100):
-        map, flashes = play_part_1(map)
-        total += flashes
-    return total
+        field, flashes = play_field(field)
+        total_flashes += flashes
+    return total_flashes
 
 
 def solve_part_2(text: str):
-    map = parse_map(text)
-    total_elements_in_map = len(map) * len(map[0])
-    round = 0
-    while True:
-        round += 1
-        map, flashes = play_part_1(map)
-        if flashes == total_elements_in_map:
-            return round
+    field = np.array(
+        [list(map(int, line)) for line in text.splitlines()], dtype=np.int8
+    )
+    for r in range(1, 1000):
+        field, _ = play_field(field)
+        if np.all(field == 0):
+            return r
+    return -1
 
 
 if __name__ == "__main__":
