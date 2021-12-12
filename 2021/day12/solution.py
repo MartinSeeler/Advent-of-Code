@@ -3,11 +3,11 @@ import time
 
 
 def parse_mapping(text: str):
-    paths = defaultdict(list)
+    paths = defaultdict(set)
     for line in text.splitlines():
         [f, t] = line.split("-")
-        paths[f].append(t)
-        paths[t].append(f)
+        paths[f].add(t)
+        paths[t].add(f)
     return paths
 
 
@@ -18,13 +18,11 @@ def find_all_paths(
         return 1
     paths = 0
     for b in mappings[x]:
-        if b.islower():
-            if b not in current_path:
-                paths += find_all_paths(mappings, b, current_path | {b}, double_allowed)
-            elif double_allowed and b not in {"start", "end"}:
-                paths += find_all_paths(mappings, b, current_path | {b}, False)
-        else:
-            paths += find_all_paths(mappings, b, current_path, double_allowed)
+        if b not in current_path:
+            tmp = {b} if b == b.lower() else set()
+            paths += find_all_paths(mappings, b, current_path | tmp, double_allowed)
+        elif double_allowed and b != "start":
+            paths += find_all_paths(mappings, b, current_path, False)
     return paths
 
 
