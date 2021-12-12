@@ -29,34 +29,29 @@ def is_valid_move_2(x: str, current: list[str]):
     return True
 
 
-def find_all_paths(
-    paths: defaultdict, current_path: list[str], condition
-) -> list[list[str]]:
+def find_all_paths(paths: defaultdict, current_path: list[str], condition) -> int:
     if len(current_path) == 0:
-        solutions = []
-        for x in paths["start"]:
-            solutions.extend(find_all_paths(paths, ["start", x], condition))
-        return solutions
+        return sum(
+            find_all_paths(paths, ["start", x], condition) for x in paths["start"]
+        )
     elif current_path[-1] == "end":
-        return [current_path]
+        return 1
     else:
-        solutions = []
-        for x in paths[current_path[-1]]:
-            if condition(x, current_path):
-                solutions.extend(find_all_paths(paths, current_path + [x], condition))
-        return solutions
+        return sum(
+            find_all_paths(paths, current_path + [x], condition)
+            for x in paths[current_path[-1]]
+            if condition(x, current_path)
+        )
 
 
 def solve_part_1(text: str):
     mapping = parse_mapping(text)
-    paths = find_all_paths(mapping, [], is_valid_move)
-    return len(paths)
+    return find_all_paths(mapping, [], is_valid_move)
 
 
 def solve_part_2(text: str):
     mapping = parse_mapping(text)
-    paths = find_all_paths(mapping, [], is_valid_move_2)
-    return len(paths)
+    return find_all_paths(mapping, [], is_valid_move_2)
 
 
 if __name__ == "__main__":
