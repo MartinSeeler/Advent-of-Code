@@ -11,47 +11,31 @@ def parse_mapping(text: str):
     return paths
 
 
-def is_valid_move(x: str, current: list[str]):
-    return (x.islower() and x not in current) or x.isupper()
-
-
-def is_valid_move_2(x: str, current: list[str]):
-    if x.isupper():
-        return True
-    else:
-        if x not in current:
-            return True
-        if x in ["start", "end"]:
-            return False
-        c = Counter(filter(lambda x: x.islower(), current))
-        if any(map(lambda x: x > 1, c.values())):
-            return False
-    return True
-
-
-def find_all_paths(paths: defaultdict, current_path: list[str], condition) -> int:
-    if len(current_path) == 0:
-        return sum(
-            find_all_paths(paths, ["start", x], condition) for x in paths["start"]
-        )
-    elif current_path[-1] == "end":
+def find_all_paths(
+    mappings: defaultdict, x: str, current_path: set, double_allowed: bool
+) -> int:
+    if x == "end":
         return 1
-    else:
-        return sum(
-            find_all_paths(paths, current_path + [x], condition)
-            for x in paths[current_path[-1]]
-            if condition(x, current_path)
-        )
+    paths = 0
+    for b in mappings[x]:
+        if b.islower():
+            if b not in current_path:
+                paths += find_all_paths(mappings, b, current_path | {b}, double_allowed)
+            elif double_allowed and b not in {"start", "end"}:
+                paths += find_all_paths(mappings, b, current_path | {b}, False)
+        else:
+            paths += find_all_paths(mappings, b, current_path, double_allowed)
+    return paths
 
 
 def solve_part_1(text: str):
     mapping = parse_mapping(text)
-    return find_all_paths(mapping, [], is_valid_move)
+    return find_all_paths(mapping, "start", {"start"}, False)
 
 
 def solve_part_2(text: str):
     mapping = parse_mapping(text)
-    return find_all_paths(mapping, [], is_valid_move_2)
+    return find_all_paths(mapping, "start", {"start"}, True)
 
 
 if __name__ == "__main__":
