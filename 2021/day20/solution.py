@@ -1,51 +1,33 @@
-from itertools import product
+from functools import reduce
 import time
+import numpy as np
+from scipy.ndimage import convolve
 
-all_sides = list(product((-1, 0, 1), (-1, 0, 1)))
-
-
-def step(image, enhance, input_on):
-    visited = set()
-    new_image = set()
-
-    for (x, y) in image:
-        for (dx, dy) in all_sides:
-            if (x + dx, y + dy) in visited:
-                continue
-            visited.add((x + dx, y + dy))
-            bin_num = ""
-            for (ddy, ddy) in all_sides:
-                bin_num += (
-                    "1" if ((x + dx + ddy, y + dy + ddy) in image) == input_on else "0"
-                )
-            if (enhance[int(bin_num, 2)] == "#") is not input_on:
-                new_image.add((x + dx, y + dy))
-
-    return new_image
+to_1s = lambda xs: list(map(lambda p: int(p == "#"), xs))
 
 
-def parse(text: str):
-    enhance, img_data = text.split("\n\n")
-    image = set()
-    for x, row in enumerate(img_data.splitlines()):
-        for y, v in enumerate(row):
-            if v == "#":
-                image.add((x, y))
-    return enhance, image
+def solve(text: str, iters: int) -> int:
+    enhance_data, _, *img = text.splitlines()
+
+    enhance_data = np.array(to_1s(enhance_data))
+    img = np.pad([to_1s(r) for r in img], (50, 50))
+
+    binary = 2 ** np.arange(9).reshape(3, 3)
+    return np.sum(
+        reduce(
+            lambda x, _: enhance_data[convolve(x, binary)],
+            range(iters),
+            img,
+        )
+    )
 
 
 def solve_part_1(text: str):
-    enhance, image = parse(text)
-    for _ in range(1):
-        image = step(step(image, enhance, True), enhance, False)
-    return len(image)
+    return solve(text, 2)
 
 
 def solve_part_2(text: str):
-    enhance, image = parse(text)
-    for _ in range(25):
-        image = step(step(image, enhance, True), enhance, False)
-    return len(image)
+    return solve(text, 50)
 
 
 if __name__ == "__main__":
