@@ -25,16 +25,16 @@ def solve_part_1(text: str):
 def solve_part_2(text: str):
     card_matches_table = get_matches(text)
     cards_counter = Counter()
-    cards_queue = deque(range(1, len(card_matches_table) + 1))
 
-    while cards_queue:
-        card_idx = cards_queue.popleft()
-        cards_counter[card_idx] += 1
-        matches = card_matches_table[card_idx - 1]
+    for current_card_number, card_matches in enumerate(card_matches_table, start=1):
+        cards_counter[current_card_number] += 1
+        num_of_cards = cards_counter[current_card_number]
 
-        for idx2 in range(card_idx + 1, card_idx + matches + 1):
-            if idx2 <= len(card_matches_table):
-                cards_queue.append(idx2)
+        for cidx in range(
+            current_card_number + 1, current_card_number + card_matches + 1
+        ):
+            if cidx <= len(card_matches_table):
+                cards_counter[cidx] += num_of_cards
 
     return sum(cards_counter.values())
 
