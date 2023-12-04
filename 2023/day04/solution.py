@@ -1,42 +1,28 @@
-from collections import Counter, deque
+from collections import Counter
 import time
 
 
-def get_matches(text: str):
-    result = []
-    for line in text.splitlines():
-        _, numbers = line.split(": ")
-        card_numbers, my_numbers = [
-            [int(x) for x in xs.strip().split(" ") if x != ""]
-            for xs in numbers.strip().split("|")
-        ]
-        matches_count = 0
-        for mn in my_numbers:
-            if mn in card_numbers:
-                matches_count += 1
-        result.append(matches_count)
-    return result
+def get_matches(text):
+    return [
+        sum(1 for mn in my if mn in card)
+        for _, num in (line.split(": ") for line in text.splitlines())
+        for card, my in [[list(map(int, xs.split())) for xs in num.split("|")]]
+    ]
 
 
-def solve_part_1(text: str):
+def solve_part_1(text):
     return sum(2 ** (m - 1) for m in get_matches(text) if m > 0)
 
 
-def solve_part_2(text: str):
-    card_matches_table = get_matches(text)
-    cards_counter = Counter()
-
-    for current_card_number, card_matches in enumerate(card_matches_table, start=1):
-        cards_counter[current_card_number] += 1
-        num_of_cards = cards_counter[current_card_number]
-
-        for cidx in range(
-            current_card_number + 1, current_card_number + card_matches + 1
-        ):
-            if cidx <= len(card_matches_table):
-                cards_counter[cidx] += num_of_cards
-
-    return sum(cards_counter.values())
+def solve_part_2(text):
+    matches = get_matches(text)
+    counter = Counter()
+    for i, m in enumerate(matches, 1):
+        counter[i] += 1
+        for j in range(i + 1, i + m + 1):
+            if j <= len(matches):
+                counter[j] += counter[i]
+    return sum(counter.values())
 
 
 if __name__ == "__main__":
