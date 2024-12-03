@@ -2,20 +2,41 @@ import time
 import re
 
 
-def solve_part_1(text: str):
-    # parse all `mul(44,46)` text segments from text. the numbers may have 1-3 digits.
-    # use regex to find all numbers in the text.
+def parse_muls(text: str) -> list[tuple[int, int, int]]:
     r = re.compile(r"mul\((\d{1,3}),(\d{1,3})\)")
-    matches = r.findall(text)
-    # multiply all numbers together
-    product = 0
-    for match in matches:
-        product += int(match[0]) * int(match[1])
-    return product
+    return [
+        (int(match.group(1)), int(match.group(2)), match.start())
+        for match in r.finditer(text)
+    ]
+
+
+def solve_part_1(text: str):
+    return sum(x * y for x, y, _ in parse_muls(text))
+
+
+def parse_instructs(text: str) -> tuple[list[int]]:
+    r_do = re.compile(r"do\(\)")
+    r_dont = re.compile(r"don't\(\)")
+    return [match.start() for match in r_do.finditer(text)], [
+        match.start() for match in r_dont.finditer(text)
+    ]
 
 
 def solve_part_2(text: str):
-    pass
+    dos, donts = parse_instructs(text)
+    ranges = []
+    i_dont, i_do = 0, 0
+    while i_dont < len(donts) and i_do < len(dos):
+        if donts[i_dont] <= dos[i_do]:
+            ranges.append((donts[i_dont], dos[i_do]))
+            i_dont += 1
+        else:
+            i_do += 1
+
+    muls = parse_muls(text)
+    for r in ranges:
+        muls = [(x, y, i) for x, y, i in muls if not (r[0] <= i < r[1])]
+    return sum(x * y for x, y, _ in muls)
 
 
 if __name__ == "__main__":
