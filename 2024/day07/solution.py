@@ -12,7 +12,9 @@ def can_make_target(target, numbers, ops):
         new_results = set()
         for prev_result in possible_results:
             for op in ops:
-                new_results.add(op(prev_result, num))
+                res = op(prev_result, num)
+                if res <= target:
+                    new_results.add(res)
 
         possible_results = new_results
 
