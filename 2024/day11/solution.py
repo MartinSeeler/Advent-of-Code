@@ -3,36 +3,27 @@ import time
 
 
 @functools.lru_cache(None)
-def transform_number(n: int):
-    n_str = str(n)
-    if n == 0:
-        return [1]
-    elif len(n_str) % 2 == 0:
-        l, r = n_str[: len(n_str) // 2], n_str[len(n_str) // 2 :]
-        return [int(l), int(r)]
+def solve(x, t):
+    if t == 0:
+        return 1
+    elif x == 0:
+        return solve(1, t - 1)
+    elif len(str(x)) % 2 == 0:
+        x_str = str(x)
+        l = x_str[: len(x_str) // 2]
+        r = x_str[len(x_str) // 2 :]
+        l, r = (int(l), int(r))
+        return solve(l, t - 1) + solve(r, t - 1)
     else:
-        # multiply number by 2024
-        return [n * 2024]
-
-
-def transform_numbers(numbers: list[int]):
-    for n in numbers:
-        for n_transformed in transform_number(n):
-            yield n_transformed
+        return solve(x * 2024, t - 1)
 
 
 def solve_part_1(text: str):
-    numbers = [int(x) for x in text.strip().split(" ")]
-    for _ in range(25):
-        numbers = list(transform_numbers(numbers))
-    return len(numbers)
+    return sum(solve(x, 25) for x in [int(x) for x in text.strip().split(" ")])
 
 
 def solve_part_2(text: str):
-    numbers = [int(x) for x in text.strip().split(" ")]
-    for _ in range(75):
-        numbers = list(transform_numbers(numbers))
-    return len(numbers)
+    return sum(solve(x, 75) for x in [int(x) for x in text.strip().split(" ")])
 
 
 if __name__ == "__main__":
