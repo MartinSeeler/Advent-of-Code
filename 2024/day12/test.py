@@ -31,12 +31,50 @@ def test_part_1_solution(quiz_input, expected_result):
     "quiz_input,expected_result",
     [
         (
-            """\
-      fill
-      me
-      in""",
-            0,
-        )
+            """AAAA
+BBCD
+BBCC
+EEEC""",
+            80,
+        ),
+        (
+            """OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO""",
+            436,
+        ),
+        (
+            """EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE""",
+            236,
+        ),
+        (
+            """AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA""",
+            368,
+        ),
+        (
+            """RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE""",
+            1206,
+        ),
     ],
 )
 def test_part_2_solution(quiz_input, expected_result):
