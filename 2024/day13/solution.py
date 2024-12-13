@@ -8,29 +8,26 @@ def find_min_cost_for_machine(machine: list[int], add: int = 0):
     Y += add
 
     # Compute the determinant
-    denom = A_x * B_y - A_y * B_x
-    if denom == 0:
-        # No unique solution
-        return 0
+    Δ = A_x * B_y - A_y * B_x
+    if Δ == 0:
+        return 0  # No unique solution
 
-    # Compute B using integer division
+    # Apply Cramer's rule
+    # A = (X*B_y - Y*B_x) / Δ
+    # B = (A_x*Y - A_y*X) / Δ
+    numerator_A = X * B_y - Y * B_x
     numerator_B = A_x * Y - A_y * X
-    if numerator_B % denom != 0:
-        # Not an integer solution for B
-        return 0
-    B = numerator_B // denom
 
-    # Compute A using integer division
-    numerator_A = X - B_x * B
-    if numerator_A % A_x != 0:
-        # Not an integer solution for A
+    # Check if A and B are integers
+    if numerator_A % Δ != 0 or numerator_B % Δ != 0:
         return 0
-    A = numerator_A // A_x
 
-    # Ensure A and B are non-negative
+    A = numerator_A // Δ
+    B = numerator_B // Δ
+
+    # Check non-negativity
     if A >= 0 and B >= 0:
-        cost = 3 * A + B
-        return cost
+        return 3 * A + B
 
     return 0
 
