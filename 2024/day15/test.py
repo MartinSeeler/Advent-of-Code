@@ -53,11 +53,16 @@ def test_part_1_solution(quiz_input, expected_result):
     "quiz_input,expected_result",
     [
         (
-            """\
-      fill
-      me
-      in""",
-            0,
+            """#######
+#...#.#
+#.....#
+#..OO@#
+#..O..#
+#.....#
+#######
+
+<vv<<^^<<^^""",
+            105,
         )
     ],
 )

@@ -7,14 +7,27 @@ dirs_offset = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 def move(pos: tuple[int, int], map: dict[tuple[int, int], str], direction: str):
     if pos not in map:
         return pos, map
+    map_backup = {k: v for k, v in map.items()}
     dir_offset = dirs_offset[dirs.index(direction)]
     new_pos = (pos[0] + dir_offset[0], pos[1] + dir_offset[1])
     if new_pos in map and map[new_pos] == "#":
         return pos, map
     if new_pos in map and map[new_pos] != "#":
-        nnew_pos, map = move(new_pos, map, direction)
-        if nnew_pos == new_pos:
-            return pos, map
+        if direction in ["^", "v"] and map[pos] in ["[", "]"]:
+            current_c = map[pos]
+            nnew_pos, map = move(new_pos, map, direction)
+            if nnew_pos == new_pos:
+                return pos, map_backup
+            x_dx = -1 if current_c == "]" else 1
+            nnew_pos = (pos[0] + x_dx, pos[1])
+            print(f"moving {current_c}, have to also move to {nnew_pos}")
+            nnnew_pos, map = move(nnew_pos, map, direction)
+            if nnnew_pos == nnew_pos:
+                return pos, map_backup
+        else:
+            nnew_pos, map = move(new_pos, map, direction)
+            if nnew_pos == new_pos:
+                return pos, map_backup
     map[new_pos] = map[pos]
     del map[pos]
     return new_pos, map
@@ -60,7 +73,31 @@ def solve_part_1(text: str):
 
 
 def solve_part_2(text: str):
-    pass
+    map_view, instructions = text.split("\n\n")
+    map_view = map_view.replace("#", "##")
+    map_view = map_view.replace(".", "..")
+    map_view = map_view.replace("O", "[]")
+    map_view = map_view.replace("@", "@.")
+
+    instructions = instructions.replace("\n", "")
+
+    robot = (0, 0)
+    map = dict()
+    for y, line in enumerate(map_view.split("\n")):
+        for x, char in enumerate(line):
+            if char == "@":
+                robot = (x, y)
+            if char != ".":
+                map[(x, y)] = char
+
+    for i in instructions:
+        robot, map = move(robot, map, i)
+        print(f"Move {i}:")
+        print_map(map)
+    # find all boxes coordinates ('0''s)
+    boxes = [(x, y) for (x, y) in map.keys() if map[(x, y)] == "O"]
+
+    return sum([100 * y + x for x, y in boxes])
 
 
 if __name__ == "__main__":
