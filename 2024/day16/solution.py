@@ -22,7 +22,7 @@ def calculate_min_scores(
     return scores
 
 
-def solve_part_1(text: str):
+def parse(text: str):
     walls: set[complex] = set()
     start: complex = 0j
     end: complex = 0j
@@ -37,12 +37,38 @@ def solve_part_1(text: str):
                     end = complex(x, y)
                 case _:
                     pass
+    return start, end, walls
+
+
+def solve_part_1(text: str):
+    start, end, walls = parse(text)
     scores = calculate_min_scores(start, walls)
     return min(scores[dir][end] for dir in POSSIBLE_DIRS if end in scores[dir])
 
 
 def solve_part_2(text: str):
-    pass
+    start, end, walls = parse(text)
+    scores = calculate_min_scores(start, walls)
+    path: set[complex] = {start, end}
+    cost = min(scores[dir][end] for dir in POSSIBLE_DIRS if end in scores[dir])
+    points = deque(
+        [
+            (end, dir, cost)
+            for dir in POSSIBLE_DIRS
+            if end in scores[dir] and scores[dir][end] == cost
+        ]
+    )
+    while points:
+        p, d, cost = points.popleft()
+        for move, dir, c1 in [
+            (p - d, d, cost - 1),
+            (p, d * 1j, cost - 1000),
+            (p, d * -1j, cost - 1000),
+        ]:
+            if move in scores[dir] and scores[dir][move] == c1:
+                path.add(move)
+                points.append((move, dir, c1))
+    return len(path)
 
 
 if __name__ == "__main__":
