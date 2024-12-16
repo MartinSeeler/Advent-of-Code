@@ -1,103 +1,59 @@
 import time
-
-dirs = ["^", "v", "<", ">"]
-dirs_offset = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+from collections import defaultdict
 
 
-def move(pos: tuple[int, int], map: dict[tuple[int, int], str], direction: str):
-    if pos not in map:
-        return pos, map
-    map_backup = {k: v for k, v in map.items()}
-    dir_offset = dirs_offset[dirs.index(direction)]
-    new_pos = (pos[0] + dir_offset[0], pos[1] + dir_offset[1])
-    if new_pos in map and map[new_pos] == "#":
-        return pos, map
-    if new_pos in map and map[new_pos] != "#":
-        if direction in ["^", "v"] and map[pos] in ["[", "]"]:
-            current_c = map[pos]
-            nnew_pos, map = move(new_pos, map, direction)
-            if nnew_pos == new_pos:
-                return pos, map_backup
-            x_dx = -1 if current_c == "]" else 1
-            nnew_pos = (pos[0] + x_dx, pos[1])
-            print(f"moving {current_c}, have to also move to {nnew_pos}")
-            nnnew_pos, map = move(nnew_pos, map, direction)
-            if nnnew_pos == nnew_pos:
-                return pos, map_backup
+def parse_map(text: str):
+    map, instructions = text.split("\n\n")
+    map = defaultdict(str) | {
+        (y + x * 1j): c
+        for y, line in enumerate(map.splitlines())
+        for x, c in enumerate(line)
+    }
+    instructions = [
+        {"^": -1, ">": 1j, "v": 1, "<": -1j}[instruction]
+        for instruction in instructions.replace("\n", "")
+    ]
+    return map, instructions
+
+
+def simulate(map, instructions):
+    pos = next(k for k, v in map.items() if v == "@")
+    for inst in instructions:
+        to_move = []
+        path = [pos]
+        while path:
+            pos = path.pop()
+            if map[pos] in ["#", ""]:
+                break
+            elif map[pos] != ".":
+                to_move.append(pos)
+                np = pos + inst
+                path.append(np)
+                if not inst.imag and map[np] == "[":
+                    path.append(np + 1j)
+                if not inst.imag and map[np] == "]":
+                    path.append(np - 1j)
         else:
-            nnew_pos, map = move(new_pos, map, direction)
-            if nnew_pos == new_pos:
-                return pos, map_backup
-    map[new_pos] = map[pos]
-    del map[pos]
-    return new_pos, map
-
-
-def print_map(map: dict[tuple[int, int], str]):
-    min_x = min([pos[0] for pos in map.keys()])
-    max_x = max([pos[0] for pos in map.keys()])
-    min_y = min([pos[1] for pos in map.keys()])
-    max_y = max([pos[1] for pos in map.keys()])
-
-    for y in range(min_y, max_y + 1):
-        line = ""
-        for x in range(min_x, max_x + 1):
-            if (x, y) in map:
-                line += map[(x, y)]
-            else:
-                line += "."
-        print(line)
-    print()
+            seen = set()
+            for pos in reversed(to_move):
+                if pos not in seen:
+                    seen.add(pos)
+                    map[pos], map[pos + inst] = map[pos + inst], map[pos]
+            pos += inst
 
 
 def solve_part_1(text: str):
-    map_view, instructions = text.split("\n\n")
-    instructions = instructions.replace("\n", "")
-
-    robot = (0, 0)
-    map = dict()
-    for y, line in enumerate(map_view.split("\n")):
-        for x, char in enumerate(line):
-            if char == "@":
-                robot = (x, y)
-            if char != ".":
-                map[(x, y)] = char
-
-    for i in instructions:
-        robot, map = move(robot, map, i)
-    print_map(map)
-    # find all boxes coordinates ('0''s)
-    boxes = [(x, y) for (x, y) in map.keys() if map[(x, y)] == "O"]
-
-    return sum([100 * y + x for x, y in boxes])
+    map, instructions = parse_map(text)
+    simulate(map, instructions)
+    return sum(n.real * 100 + n.imag for n in map if map[n] == "O")
 
 
 def solve_part_2(text: str):
-    map_view, instructions = text.split("\n\n")
-    map_view = map_view.replace("#", "##")
-    map_view = map_view.replace(".", "..")
-    map_view = map_view.replace("O", "[]")
-    map_view = map_view.replace("@", "@.")
-
-    instructions = instructions.replace("\n", "")
-
-    robot = (0, 0)
-    map = dict()
-    for y, line in enumerate(map_view.split("\n")):
-        for x, char in enumerate(line):
-            if char == "@":
-                robot = (x, y)
-            if char != ".":
-                map[(x, y)] = char
-
-    for i in instructions:
-        robot, map = move(robot, map, i)
-        print(f"Move {i}:")
-        print_map(map)
-    # find all boxes coordinates ('0''s)
-    boxes = [(x, y) for (x, y) in map.keys() if map[(x, y)] == "O"]
-
-    return sum([100 * y + x for x, y in boxes])
+    map, instructions = parse_map(
+        text.replace("O", "[]").replace(".", "..").replace("#", "##").replace("@", "@.")
+    )
+    simulate(map, instructions)
+    return sum(n.real * 100 + n.imag for n in map if map[n] == "[")
 
 
 if __name__ == "__main__":
