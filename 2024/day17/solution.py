@@ -2,12 +2,7 @@ import time
 import re
 
 
-def solve_part_1(text: str):
-    nums = re.findall(r"\d+", text)
-    A, B, C = map(int, nums[:3])
-    instructions = list(map(int, nums[3:]))
-    print(A, B, C)
-    print(instructions)
+def solve_crazy_machine(A, B, C, instructions) -> str:
 
     def combo_operand(x: int) -> int:
         match x:
@@ -27,7 +22,6 @@ def solve_part_1(text: str):
     while instruction_pointer < len(instructions):
         opcode = instructions[instruction_pointer]
         operand = instructions[instruction_pointer + 1]
-        print(opcode, operand, instruction_pointer, A, B, C, outs)
 
         if opcode == 0:  # adv
             numerator = A
@@ -67,8 +61,33 @@ def solve_part_1(text: str):
     return ",".join(map(str, outs))
 
 
+def solve_part_1(text: str):
+    nums = re.findall(r"\d+", text)
+    A, B, C = map(int, nums[:3])
+    instructions = list(map(int, nums[3:]))
+
+    return solve_crazy_machine(A, B, C, instructions)
+
+
 def solve_part_2(text: str):
-    pass
+    nums = re.findall(r"\d+", text)
+    instructions = list(map(int, nums[3:]))
+
+    A_quine = 0
+    num_instructions = len(instructions)
+    for idx in range(num_instructions):
+        so_far = instructions[num_instructions - idx - 1 :]
+        steps = 0
+        while True:
+            aprime = (A_quine << 3) + steps
+            current_result = list(
+                map(int, solve_crazy_machine(aprime, 0, 0, instructions).split(","))
+            )
+            if current_result == so_far:
+                A_quine = aprime
+                break
+            steps += 1
+    return A_quine
 
 
 if __name__ == "__main__":

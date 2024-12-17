@@ -24,11 +24,12 @@ def test_part_1_solution(quiz_input, expected_result):
     "quiz_input,expected_result",
     [
         (
-            """\
-      fill
-      me
-      in""",
-            0,
+            """Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0""",
+            117440,
         )
     ],
 )
