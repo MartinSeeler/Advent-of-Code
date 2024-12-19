@@ -1,24 +1,29 @@
+from memoization import cached
 import time
 
 
-def is_possible(design, patterns) -> bool:
+@cached
+def calc_possible_arrangements(design: str, patterns: set[str]) -> bool:
+    if design == "":
+        return 0
     matching_starts = [p for p in patterns if design.startswith(p)]
-    completed = any(design == ms for ms in matching_starts)
-    if completed:
-        return True
-    else:
-        return any(is_possible(design[len(ms) :], patterns) for ms in matching_starts)
+    completed = sum(design == ms for ms in matching_starts)
+    return completed + sum(
+        calc_possible_arrangements(design[len(ms) :], patterns)
+        for ms in matching_starts
+    )
 
 
 def solve_part_1(text: str):
     lines = text.splitlines()
-    patterns = lines[0].strip().split(", ")
-
-    return sum(is_possible(design, patterns) for design in lines[2:])
+    patterns = set(lines[0].strip().split(", "))
+    return sum(calc_possible_arrangements(design, patterns) > 0 for design in lines[2:])
 
 
 def solve_part_2(text: str):
-    pass
+    lines = text.splitlines()
+    patterns = set(lines[0].strip().split(", "))
+    return sum(calc_possible_arrangements(design, patterns) for design in lines[2:])
 
 
 if __name__ == "__main__":

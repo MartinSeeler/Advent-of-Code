@@ -29,11 +29,17 @@ def test_part_1_solution(quiz_input, expected_result):
     "quiz_input,expected_result",
     [
         (
-            """\
-      fill
-      me
-      in""",
-            0,
+            """r, wr, b, g, bwu, rb, gb, br
+
+brwrr
+bggr
+gbbr
+rrbgbr
+ubwu
+bwurrg
+brgr
+bbrgwb""",
+            16,
         )
     ],
 )
