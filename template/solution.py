@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 
 def solve_part_1(text: str):
@@ -10,7 +11,7 @@ def solve_part_2(text: str):
 
 
 if __name__ == '__main__':
-  with open("input.txt", "r") as f:
+  with open(Path(__file__).parent / "input.txt", "r") as f:
     quiz_input = f.read()
     start = time.time()
     p_1_solution = int(solve_part_1(quiz_input))
