@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from math import prod
 
 
 def solve_part_1(text: str):
@@ -9,13 +10,7 @@ def solve_part_1(text: str):
   cols = len(ops)
   res = 0
   for i in range(cols):
-    if ops[i] == '+':
-      res += sum(nums[i::cols])
-    elif ops[i] == '*':
-      prod = 1
-      for n in nums[i::cols]:
-        prod *= n
-      res += prod
+    res += sum(nums[i::cols]) if ops[i] == '+' else prod(nums[i::cols])
   return res
 
 
@@ -31,15 +26,7 @@ def solve_part_2(text: str):
   while col_idx >= -1 and op_idx >= 0:
     # if all nums in this column are spaces, skip and decrement op_idx
     if all(line[col_idx] == ' ' for line in numbers) or col_idx == -1:
-      # empty row, skip
-      # process numbers
-      if ops[op_idx] == '+':
-        res += sum(nums)
-      elif ops[op_idx] == '*':
-        prod = 1
-        for n in nums:
-          prod *= n
-        res += prod
+      res += sum(nums) if ops[op_idx] == '+' else prod(nums)
       nums = []
       op_idx -= 1
     else:
@@ -53,25 +40,6 @@ def solve_part_2(text: str):
         nums.append(int(num))
     col_idx -= 1
 
-  
-  return res
-
-  
-
-
-
-  nums = [int(num) for line in lines[:-1] for num in line.split() if num.isdigit()]
-  ops = [c for c in lines[-1] if c in '+*']
-  cols = len(ops)
-  res = 0
-  for i in range(cols):
-    if ops[i] == '+':
-      res += sum(nums[i::cols])
-    elif ops[i] == '*':
-      prod = 1
-      for n in nums[i::cols]:
-        prod *= n
-      res += prod
   return res
 
 
