@@ -58,18 +58,10 @@ def solve_part_1(text: str):
 
 
 def solve_machine_part2(buttons, targets):
-  """
-  Solve Ax = b where:
-  - A[j][i] = 1 if button i affects counter j
-  - x[i] = number of times to press button i (non-negative integer)
-  - b[j] = target[j]
-  Minimize sum(x).
-  """
   n_buttons = len(buttons)
   n_counters = len(targets)
 
   # Build augmented matrix [A | b] using Fractions for exact arithmetic
-  # Rows = counters, Cols = buttons + 1 (for target)
   matrix = []
   for j in range(n_counters):
     row = []
@@ -78,8 +70,7 @@ def solve_machine_part2(buttons, targets):
     row.append(Fraction(targets[j]))
     matrix.append(row)
 
-  # Gaussian elimination to Row Echelon Form
-  pivot_cols = []  # which column each row pivots on
+  pivot_cols = []
   pivot_row = 0
   for col in range(n_buttons):
     # Find pivot in this column
@@ -89,18 +80,15 @@ def solve_machine_part2(buttons, targets):
         found = row
         break
     if found == -1:
-      continue  # No pivot in this column, it's a free variable
+      continue
 
-    # Swap rows
     matrix[pivot_row], matrix[found] = matrix[found], matrix[pivot_row]
-    pivot_cols.append((pivot_row, col))
+    pivot_cols.append(col)
 
-    # Scale pivot row to have leading 1
     scale = matrix[pivot_row][col]
     for c in range(n_buttons + 1):
       matrix[pivot_row][c] /= scale
 
-    # Eliminate all other rows
     for row in range(n_counters):
       if row != pivot_row and matrix[row][col] != 0:
         factor = matrix[row][col]
@@ -109,89 +97,81 @@ def solve_machine_part2(buttons, targets):
 
     pivot_row += 1
 
-  # Identify free variables (columns without pivots)
-  pivot_col_set = {col for (_, col) in pivot_cols}
-  free_vars = [i for i in range(n_buttons) if i not in pivot_col_set]
+  n_pivots = pivot_row
+  pivot_col_set = set(pivot_cols)
+  free_cols = [i for i in range(n_buttons) if i not in pivot_col_set]
 
-  # Precompute coefficients for pivot variables
-  # pivot_var[col] = constant[col] + sum(coef[col][f] * free_var[f])
-  constants = {}
-  coefficients = {}
-  for (row, col) in pivot_cols:
-    constants[col] = matrix[row][n_buttons]
-    coefficients[col] = [matrix[row][f] for f in free_vars]
+  # Check for inconsistent system
+  for row in range(n_pivots, n_counters):
+    if matrix[row][n_buttons] != 0:
+      return float('inf')
 
-  # Recursive search with pruning
+  # Build expressions: pivot_var = const - sum(coef * free_var)
+  expressions = []
+  for i, col in enumerate(pivot_cols):
+    const = matrix[i][n_buttons]
+    coefs = [(j, matrix[i][free_cols[j]]) for j in range(len(free_cols)) if matrix[i][free_cols[j]] != 0]
+    expressions.append((col, const, coefs))
+
   min_presses = [float('inf')]
 
   def search(idx, free_vals, current_sum):
     if current_sum >= min_presses[0]:
-      return  # Prune: already worse than best
+      return
 
-    if idx == len(free_vars):
-      # Compute pivot variables and check validity
+    if idx == len(free_cols):
       total = current_sum
-      for (_, col) in pivot_cols:
-        val = constants[col]
-        for i, fv in enumerate(free_vals):
-          val -= coefficients[col][i] * fv
+      for pivot_col, const, coefs in expressions:
+        val = const
+        for j, coef in coefs:
+          val -= coef * free_vals[j]
         if val < 0 or val.denominator != 1:
-          return  # Invalid
-        total += val
+          return
+        total += int(val)
         if total >= min_presses[0]:
-          return  # Prune
+          return
       min_presses[0] = total
       return
 
-    # Determine bounds for this free variable
-    # We need all pivot variables to be >= 0
-    # pivot_var = constant - coef * free_var >= 0
     min_val = 0
-    max_val = max(targets)
+    max_val = sum(targets)
 
-    for (_, col) in pivot_cols:
-      remaining_const = constants[col]
-      for i, fv in enumerate(free_vals):
-        remaining_const -= coefficients[col][i] * fv
-      coef = coefficients[col][idx]
-      if coef > 0:
-        # remaining_const - coef * x >= 0 => x <= remaining_const / coef
-        upper = remaining_const / coef
-        max_val = min(max_val, int(upper) if upper >= 0 else -1)
-      elif coef < 0:
-        # remaining_const - coef * x >= 0
-        # Since coef < 0, -coef > 0, so: remaining_const + (-coef) * x >= 0
-        # => x >= -remaining_const / (-coef) = remaining_const / coef
-        # But coef is negative, so division flips inequality
-        lower = remaining_const / coef
-        if lower > 0:
-          from math import ceil
-          min_val = max(min_val, ceil(float(lower)))
+    for pivot_col, const, coefs in expressions:
+      remaining = const
+      for j, coef in coefs:
+        if j < idx:
+          remaining -= coef * free_vals[j]
 
-    # Don't prune here - constraints might be satisfiable with other free vars
-    # Just use reasonable bounds
-    if min_val > max_val:
-      min_val = 0
-      max_val = max(targets) * 5  # Conservative upper bound
+      coef_current = Fraction(0)
+      has_later_free = False
+      for j, coef in coefs:
+        if j == idx:
+          coef_current = coef
+        elif j > idx and coef != 0:
+          has_later_free = True
 
-    # Cap the upper bound but allow it to be quite large
-    upper_limit = min(max_val + 1, max(targets) * 5)
+      if coef_current > 0 and not has_later_free:
+        upper = remaining / coef_current
+        if upper < 0:
+          return
+        max_val = min(max_val, int(upper))
 
-    for v in range(min_val, upper_limit):
+    if max_val < 0:
+      return
+
+    for v in range(min_val, max_val + 1):
       search(idx + 1, free_vals + [Fraction(v)], current_sum + v)
 
-  if not free_vars:
-    # No free variables - compute unique solution directly
+  if not free_cols:
     total = Fraction(0)
     valid = True
-    for (row, col) in pivot_cols:
-      val = constants[col]
-      if val < 0 or val.denominator != 1:
+    for pivot_col, const, coefs in expressions:
+      if const < 0 or const.denominator != 1:
         valid = False
         break
-      total += val
+      total += const
     if valid:
-      min_presses[0] = total
+      min_presses[0] = int(total)
   else:
     search(0, [], 0)
 
@@ -218,10 +198,7 @@ def solve_part_2(text: str):
 
     machine_res = solve_machine_part2(buttons, targets)
     if machine_res == float('inf'):
-      # Some machines might not have a solution - skip them or use 0
-      # For now, let's assume they should have solutions and this is a bug
-      # print(f"Warning: No solution found for machine {line_num}")
-      machine_res = 0  # or we could raise an error
+      machine_res = 0
     res += machine_res
   return res
 
